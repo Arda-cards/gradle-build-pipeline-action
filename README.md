@@ -23,9 +23,12 @@ jobs:
     steps:
       - id: build
         uses: Arda-cards/gradle-build-pipeline-action@v1
-        env:
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+        with:
+          gpr_user: # user with read access to GitHub Package Repository
+          gpr_key: # PT with read access to GitHub Package Repository
+          docker_registry: # where to publish docker images; workflow's token need write access to it
+          helm_registry: # where to publish helm charts; workflow's token need write access to it
+          token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ## Permission Required
