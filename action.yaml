@@ -31,7 +31,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v4
     - name: "Configure git client"
       shell: bash
       run: |

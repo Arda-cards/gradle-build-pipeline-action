@@ -1,11 +1,12 @@
 # gradle build
 
-... Grab the badge for the CI build here, see
-[Adding a workflow status badge](https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows/monitoring-workflows/adding-a-workflow-status-badge) ...
+[![ci](https://github.com/Arda-cards/gradle-build-pipeline-action/actions/workflows/ci.yaml/badge.svg)](https://github.com/Arda-cards/gradle-build-pipeline-action/actions/workflows/ci.yaml)
 [CHANGELOG.md](CHANGELOG.md)
 
 This action handle the complete build pipeline for a gradle project. It uses the project's `CHANGELOG.md`, the GitHub event and the branch to decide
 whether to publish artifacts or not.
+
+This action expects the project to ave been checked out already in the `github.workspace`.
 
 ## Arguments
 
