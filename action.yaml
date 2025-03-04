@@ -35,10 +35,8 @@ runs:
     - name: "Configure git client"
       shell: bash
       run: |
-        if [ "${{ runner.debug }}" == 1 ]; then
-          set -xv
-        fi
-        set -eu
+        [ "${{ runner.debug }}" == 1 ] && set -xv
+        set -u
         
         git config user.name "${{ github.actor }}"
         git config user.email "${{ github.actor }}@users.noreply.github.com"
@@ -46,10 +44,8 @@ runs:
       name: "Is a release or a feature version needed?"
       shell: bash
       run: |
-        if [ "${{ runner.debug }}" == 1 ]; then
-          set -xv
-        fi
-        set -eu
+        [ "${{ runner.debug }}" == 1 ] && set -xv
+        set -u
         
         function is_release_branch() {
             if [ "${{ github.ref }}" == "refs/heads/main" ]; then
@@ -74,6 +70,17 @@ runs:
         distribution: corretto
         java-version: '21'
     - uses: gradle/actions/setup-gradle@v4
+    - id: read-gradle-properties
+      shell: bash
+      run: |
+        [ "${{ runner.debug }}" == 1 ] && set -xv
+        set -u
+
+        echo "helm-version=$(grep -w helm.client.download.version gradle.properties | cut -d= -f2)" >>${GITHUB_OUTPUT}
+    - uses: azure/setup-helm@v4
+      if: ${{ steps.read-gradle-properties.outputs.helm-version }}
+      with:
+        version: ${{ steps.read-gradle-properties.outputs.helm-version }}
     - name: "Extract tag from the changelog"
       uses: denisa/clq-action@v1
       id: clq-extract
@@ -84,10 +91,8 @@ runs:
       name: "Is this a test or publish build"
       shell: bash
       run: |
-        if [ "${{ runner.debug }}" == 1 ]; then
-          set -xv
-        fi
-        set -eu
+        [ "${{ runner.debug }}" == 1 ] && set -xv
+        set -u
         
         function is_release_branch() {
             if [ "${{ github.ref }}" == "refs/heads/main" ]; then
@@ -127,10 +132,8 @@ runs:
     - name: "Tag source"
       shell: bash
       run: |
-        if [ "${{ runner.debug }}" == 1 ]; then
-          set -xv
-        fi
-        set -eu
+        [ "${{ runner.debug }}" == 1 ] && set -xv
+        set -u
         
         function is_release_branch() {
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
@@ -162,10 +165,8 @@ runs:
       if: failure() && steps.build.outcome == 'failure'
       shell: bash
       run: |
-        if [ "${{ runner.debug }}" == 1 ]; then
-          set -xv
-        fi
-        set -eu
+        [ "${{ runner.debug }}" == 1 ] && set -xv
+        set -u
         
         function is_release_branch() {
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
