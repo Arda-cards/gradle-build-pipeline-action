@@ -144,7 +144,8 @@ runs:
         if [ "${{ steps.define-build.outputs.kind }}" == "publish" ] && is_release_branch ; then
           readonly tag="${{ steps.clq-extract.outputs.tag }}"
           echo "Tagging ${tag}"
-          git tag -m "Release ${tag}" -a "${tag}"
+          readonly workflow_run="${{ github.run_id }}.${{ github.run_number }}.${{ github.run_attempt }}
+          git tag -m "Released by ${{ github.job }}, ${workflow_run}" -a "${tag}"
           git push origin "${tag}"
         fi
     - id: build
@@ -178,3 +179,4 @@ runs:
           readonly tag="${{ steps.clq-extract.outputs.tag }}"
           echo "Removing tag ${tag}"
           git push --delete origin "${tag}"
+        fi
