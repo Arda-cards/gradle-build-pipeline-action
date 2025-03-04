@@ -178,3 +178,4 @@ runs:
           readonly tag="${{ steps.clq-extract.outputs.tag }}"
           echo "Removing tag ${tag}"
           git push --delete origin "${tag}"
+        fi
