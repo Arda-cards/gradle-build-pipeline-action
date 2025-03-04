@@ -149,7 +149,7 @@ runs:
           git push origin "${tag}"
         fi
     - id: build
-      uses: Arda-cards/gradle-build-action@v3
+      uses: Arda-cards/gradle-build-action@dna/pdf-rendering-module/37
       env:
         TOKEN: ${{ inputs.token }}
         USERNAME: ${{ github.actor }}
