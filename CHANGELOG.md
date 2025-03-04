@@ -18,6 +18,13 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
   - `Fixed` for any bugfixes.
   - `Security` in case of vulnerabilities.
 
+## [1.0.1] - 2025-03-04
+
+### Fixed
+
+- Git requires a message when tagging
+- Bad multi-line test in bash
+
 ## [1.0.0] - 2025-03-04
 
 ### Added
