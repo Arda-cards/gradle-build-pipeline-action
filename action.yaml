@@ -1,9 +1,180 @@
 ---
-name: "..."
-description: "..."
+name: gradle-build-pipeline
+description: "Checkout, build and tag gradle projects"
 inputs:
-  ...
+  docker_registry:
+    description: "The registry to persist Docker images"
+    required: true
+  gpr_user:
+    description: "Name of a user with read access to packages, required to get dependencies"
+    required: true
+  gpr_key:
+    description: "Personal Access Token of the gpr_user with read access to packages, required to get dependencies"
+    required: true
+  helm_registry:
+    description: "The registry to persist Helm charts"
+    required: true
+  skip_test:
+    description: "Skip test execution (true|false)"
+    required: false
+    default: "false"
+  token:
+    description: "The workflow's GitHub token"
+    required: true
 outputs:
-  ...
+  chart_name:
+    description: "The name of the helm chart, if published"
+    value: ${{ steps.build.outputs.chart_name }}
+  chart_version:
+    description: "The version of the helm chart, if published"
+    value: ${{ steps.build.outputs.chart_version }}
 runs:
-  ...
+  using: "composite"
+  steps:
+    - name: "Configure git client"
+      shell: bash
+      run: |
+        [ "${{ runner.debug }}" == 1 ] && set -xv
+        set -u
+        
+        git config user.name "${{ github.actor }}"
+        git config user.email "${{ github.actor }}@users.noreply.github.com"
+    - id: define-changelog-validation
+      name: "Is a release or a feature version needed?"
+      shell: bash
+      run: |
+        [ "${{ runner.debug }}" == 1 ] && set -xv
+        set -u
+        
+        function is_release_branch() {
+            if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+                return 0
+            fi
+            return 1
+        }
+        function is_main_pull_request() {
+            if [ "${{ github.event_name }}" == "pull_request" ] \
+                && [ "${{ github.event.pull_request.base.ref }}" == "main" ]; then
+                return 0
+            fi
+            return 1
+        }
+        if is_release_branch || is_main_pull_request; then
+          echo "mode=release" >>"${GITHUB_OUTPUT}"
+        else
+          echo "mode=feature" >>"${GITHUB_OUTPUT}"
+        fi
+    - uses: actions/setup-java@v4
+      with:
+        distribution: corretto
+        java-version: '21'
+    - uses: gradle/actions/setup-gradle@v4
+    - id: read-gradle-properties
+      shell: bash
+      run: |
+        [ "${{ runner.debug }}" == 1 ] && set -xv
+        set -u
+
+        echo "helm-version=$(grep -w helm.client.download.version gradle.properties | cut -d= -f2)" >>${GITHUB_OUTPUT}
+    - uses: azure/setup-helm@v4
+      if: ${{ steps.read-gradle-properties.outputs.helm-version }}
+      with:
+        version: ${{ steps.read-gradle-properties.outputs.helm-version }}
+    - name: "Extract tag from the changelog"
+      uses: denisa/clq-action@v1
+      id: clq-extract
+      with:
+        changeMap: .github/clq/changemap.json
+        mode: ${{ steps.define-changelog-validation.outputs.mode }}
+    - id: define-build
+      name: "Is this a test or publish build"
+      shell: bash
+      run: |
+        [ "${{ runner.debug }}" == 1 ] && set -xv
+        set -u
+        
+        function is_release_branch() {
+            if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+                return 0
+            fi
+            return 1
+        }
+        function is_feature_branch_version() {
+          # major.minor.patch-user-issue
+          # user and issue relaxed to be any alpha-numeric sequence 
+          if [[ "${{ steps.clq-extract.outputs.version }}" =~  ^[0-9]+(\.[0-9]+){2}(-[[:alnum:]]+){2}(-.+)?$ ]]; then
+            return 0
+          fi
+          return 1
+        }
+        function is_publishable_feature_branch() {
+          if ( [ "${{ github.event_name }}" == "push" ] && is_feature_branch_version ); then
+            return 0
+          fi
+          return 1
+        }
+        
+        if [ "${{ steps.define-changelog-validation.outputs.mode }}" == "release" \
+            && "${{ steps.clq-extract.outputs.status }}" != "released" ]; then
+          echo "::error ${{ steps.clq-extract.outputs.version }} is not a valid version for the default branch"
+          echo "# Version Validation Error" >>${GITHUB_STEP_SUMMARY}
+          echo "Main, or a pull-request to main, must have a release version." >>${GITHUB_STEP_SUMMARY}
+          echo "${{ steps.clq-extract.outputs.version }} is not valid" >>${GITHUB_STEP_SUMMARY}
+          exit 1
+        fi
+        
+        if is_release_branch || is_publishable_feature_branch; then
+          echo "kind=publish" >>"${GITHUB_OUTPUT}"
+        else
+          echo "kind=test" >>"${GITHUB_OUTPUT}"
+        fi
+    - name: "Tag source"
+      shell: bash
+      run: |
+        [ "${{ runner.debug }}" == 1 ] && set -xv
+        set -u
+        
+        function is_release_branch() {
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            return 0
+          fi
+            return 1
+        }
+        
+        if [ "${{ steps.define-build.outputs.kind }}" == "publish" ] && is_release_branch ; then
+          readonly tag="${{ steps.clq-extract.outputs.tag }}"
+          echo "Tagging ${tag}"
+          git tag -a "${tag}"
+          git push origin "${tag}"
+        fi
+    - id: build
+      uses: Arda-cards/gradle-build-action@v3
+      env:
+        TOKEN: ${{ inputs.token }}
+        USERNAME: ${{ github.actor }}
+      with:
+        gpr_user: ${{ inputs.gpr_user }}
+        gpr_key: ${{ inputs.gpr_key }}
+        docker_registry: ${{ inputs.docker_registry }}
+        kind: ${{ steps.define-build.outputs.kind }}
+        helm_registry: ${{ inputs.helm_registry }}
+        skip_test: ${{ inputs.skip_test }}
+        version: ${{ steps.clq-extract.outputs.version }}
+    - name: "Remove tag of failed build"
+      if: failure() && steps.build.outcome == 'failure'
+      shell: bash
+      run: |
+        [ "${{ runner.debug }}" == 1 ] && set -xv
+        set -u
+        
+        function is_release_branch() {
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            return 0
+          fi
+            return 1
+        }
+        
+        if [ "${{ steps.define-build.outputs.kind }}" == "publish" ] && is_release_branch ; then
+          readonly tag="${{ steps.clq-extract.outputs.tag }}"
+          echo "Removing tag ${tag}"
+          git push --delete origin "${tag}"
