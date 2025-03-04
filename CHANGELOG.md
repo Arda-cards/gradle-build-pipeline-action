@@ -23,6 +23,7 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
 ### Fixed
 
 - The untag script was not closing the if statement
+- Use the tag comment to map a tag to a workflow run
 
 ## [1.0.2] - 2025-03-04
 
