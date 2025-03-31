@@ -23,6 +23,7 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
 ### Added
 
 - Reads the JVM version and vendor from the gradle daemon configuration, defaulting to `corretto 21`.
+- Emits the module name. By convention, the module name is the name of a gradle module is the name of the root project.
 
 ## [1.0.3] - 2025-03-04
 
