@@ -28,9 +28,20 @@ outputs:
   chart_version:
     description: "The version of the helm chart, if published"
     value: ${{ steps.build.outputs.chart_version }}
+  module_name:
+    description: "The name of the module"
+    value: ${{ steps.read-module-info.outputs.name }}
 runs:
   using: "composite"
   steps:
+    - id: read-module-info
+      name: "Read module information"
+      shell: bash
+      run: |
+        [ "${{ runner.debug }}" == 1 ] && set -xv
+        set -u
+
+        echo "name=$(./gradlew -q properties | grep ^name: | cut -d: -f 2 | tr -d ' ')" >>"${GITHUB_OUTPUT}"
     - id: read-tools-choice
       name: "Read tools version"
       shell: bash
