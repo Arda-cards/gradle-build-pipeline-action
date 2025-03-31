@@ -31,6 +31,34 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - id: read-tools-choice
+      name: "Read tools version"
+      shell: bash
+      run: |
+        [ "${{ runner.debug }}" == 1 ] && set -xv
+        set -u
+
+        if grep -qs -w ^helm.client.download.versions gradle.properties; then
+          helm_version="$(grep -w ^helm.client.download.version gradle.properties | cut -d= -f2)"
+        fi
+
+        if grep -qs -w ^toolchainVersion gradle/gradle-daemon-jvm.properties; then
+          java_version="$(grep -w ^toolchainVersion gradle/gradle-daemon-jvm.properties | cut -d= -f2)"
+        else
+          java_version=21
+        fi
+
+        if grep -qs -w ^toolchainVendor gradle/gradle-daemon-jvm.properties; then
+          java_vendor="$(grep -w ^toolchainVendor gradle/gradle-daemon-jvm.properties | cut -d= -f2)"
+        else
+          java_vendor=corretto
+        fi
+
+        {
+        [ -v helm_version ] && echo "helm_version=${helm_version}"
+        echo "java_version=${java_version}"
+        echo "java_vendor=${java_vendor}"
+        } >>"${GITHUB_OUTPUT}"
     - name: "Configure git client"
       shell: bash
       run: |
@@ -66,20 +94,13 @@ runs:
         fi
     - uses: actions/setup-java@v4
       with:
-        distribution: corretto
-        java-version: '21'
+        distribution: ${{ steps.read-tools-choice.outputs.java_vendor }}
+        java-version: ${{ steps.read-tools-choice.outputs.java_version }}
     - uses: gradle/actions/setup-gradle@v4
-    - id: read-gradle-properties
-      shell: bash
-      run: |
-        [ "${{ runner.debug }}" == 1 ] && set -xv
-        set -u
-
-        echo "helm-version=$(grep -w helm.client.download.version gradle.properties | cut -d= -f2)" >>${GITHUB_OUTPUT}
     - uses: azure/setup-helm@v4
-      if: ${{ steps.read-gradle-properties.outputs.helm-version }}
+      if: ${{ steps.read-tools-choice.outputs.helm_version }}
       with:
-        version: ${{ steps.read-gradle-properties.outputs.helm-version }}
+        version: ${{ steps.read-tools-choice.outputs.helm_version }}
     - name: "Extract tag from the changelog"
       uses: denisa/clq-action@v1
       id: clq-extract
