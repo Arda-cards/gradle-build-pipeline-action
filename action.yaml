@@ -48,15 +48,27 @@ runs:
       run: |
         [ "${{ runner.debug }}" == 1 ] && set -xv
         set -u
-        
-        helm_version="$(grep -w ^helm.client.download.version gradle.properties | cut -d= -f2)"
-        java_version="$(grep -w ^toolchainVersion gradle/gradle-daemon-jvm.properties | cut -d= -f2)"
-        java_vendor="$(grep -w ^toolchainVendor gradle/gradle-daemon-jvm.properties | cut -d= -f2)"
+
+        if grep -qs -w ^helm.client.download.versions gradle.properties; then
+          helm_version="$(grep -w ^helm.client.download.version gradle.properties | cut -d= -f2)"
+        fi
+
+        if grep -qs -w ^toolchainVersion gradle/gradle-daemon-jvm.properties; then
+          java_version="$(grep -w ^toolchainVersion gradle/gradle-daemon-jvm.properties | cut -d= -f2)"
+        else
+          java_version=21
+        fi
+
+        if grep -qs -w ^toolchainVendor gradle/gradle-daemon-jvm.properties; then
+          java_vendor="$(grep -w ^toolchainVendor gradle/gradle-daemon-jvm.properties | cut -d= -f2)"
+        else
+          java_vendor=corretto
+        fi
 
         {
-        echo "helm_version=${helm_version}"
-        echo "java_version=${java_version:-21}"
-        echo "java_vendor=${java_vendor:-corretto}"
+        [ -v helm_version ] && echo "helm_version=${helm_version}"
+        echo "java_version=${java_version}"
+        echo "java_vendor=${java_vendor}"
         } >>"${GITHUB_OUTPUT}"
     - name: "Configure git client"
       shell: bash
