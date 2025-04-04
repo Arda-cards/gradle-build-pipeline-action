@@ -18,6 +18,13 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
   - `Fixed` for any bugfixes.
   - `Security` in case of vulnerabilities.
 
+## [1.1.0] - 2025-03-31
+
+### Added
+
+- Reads the JVM version and vendor from the gradle daemon configuration, defaulting to `corretto 21`.
+- Emits the module name. By convention, the module name of a gradle module is the name of the root project, which should also be the repository name
+
 ## [1.0.3] - 2025-03-04
 
 ### Fixed
