@@ -212,3 +212,13 @@ runs:
           echo "Removing tag ${tag}"
           git push --delete origin "${tag}"
         fi
+    - name: Store reports
+      if: failure() && steps.build.outcome == 'failure'
+      uses: actions/upload-artifact@v4
+      with:
+        name: reports
+        if-no-files-found: ignore
+        overwrite: true
+        path: |
+          **/build/reports/
+          **/build/test-results/

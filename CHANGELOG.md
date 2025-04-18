@@ -18,6 +18,13 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
   - `Fixed` for any bugfixes.
   - `Security` in case of vulnerabilities.
 
+## [1.2.0] - 2025-04-18
+
+### Added
+
+- When the gradle build fails, attach all the reports to the
+  [worhflow artifacts](https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/storing-and-sharing-data-from-a-workflow)
+
 ## [1.1.0] - 2025-03-31
 
 ### Added
