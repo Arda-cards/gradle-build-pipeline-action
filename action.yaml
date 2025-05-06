@@ -78,7 +78,7 @@ runs:
         
         git config user.name "${{ github.actor }}"
         git config user.email "${{ github.actor }}@users.noreply.github.com"
-    - id: define-changelog-validation
+    - id: define-version-validation
       name: "Is a release or a feature version needed?"
       shell: bash
       run: |
@@ -117,7 +117,7 @@ runs:
       id: clq-extract
       with:
         changeMap: .github/clq/changemap.json
-        mode: ${{ steps.define-changelog-validation.outputs.mode }}
+        mode: ${{ steps.define-version-validation.outputs.mode }}
     - id: define-build
       name: "Is this a test or publish build"
       shell: bash
@@ -146,7 +146,7 @@ runs:
           return 1
         }
         
-        if [ "${{ steps.define-changelog-validation.outputs.mode }}" == "release" ] \
+        if [ "${{ steps.define-version-validation.outputs.mode }}" == "release" ] \
             && [ "${{ steps.clq-extract.outputs.status }}" != "released" ]; then
           echo "::error ${{ steps.clq-extract.outputs.version }} is not a valid version for the default branch"
           echo "# Version Validation Error" >>${GITHUB_STEP_SUMMARY}
@@ -170,15 +170,23 @@ runs:
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
             return 0
           fi
-            return 1
+          return 1
         }
         
-        if [ "${{ steps.define-build.outputs.kind }}" == "publish" ] && is_release_branch ; then
-          readonly tag="${{ steps.clq-extract.outputs.tag }}"
-          echo "Tagging ${tag}"
-          readonly workflow_run="${{ github.run_id }}.${{ github.run_number }}.${{ github.run_attempt }}"
-          git tag -m "Released by ${{ github.job }}, ${workflow_run}" -a "${tag}"
-          git push origin "${tag}"
+        readonly tag="${{ steps.clq-extract.outputs.tag }}"
+        if is_release_branch ; then
+          if [ "${{ steps.define-build.outputs.kind }}" == "publish" ]; then
+            echo "Tagging ${tag}"
+            readonly workflow_run="${{ github.run_id }}.${{ github.run_number }}.${{ github.run_attempt }}"
+            git tag -m "Released by ${{ github.job }}, ${workflow_run}" -a "${tag}"
+            git push origin "${tag}"
+          fi
+        elif [ "${{ steps.define-version-validation.outputs.mode}}" == "release" ]; then
+          echo "Looking for existing ${tag}"
+          if git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null 2>&1; then
+            echo "::error ::tag $tag exists already"
+            exit 1
+          fi
         fi
     - id: build
       uses: Arda-cards/gradle-build-action@v3
