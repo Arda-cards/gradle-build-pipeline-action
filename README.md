@@ -6,7 +6,7 @@
 This action handle the complete build pipeline for a gradle project. It uses the project's `CHANGELOG.md`, the GitHub event and the branch to decide
 whether to publish artifacts or not.
 
-This action expects the project to ave been checked out already in the `github.workspace`.
+This action expects the project to have been checked out already in the `github.workspace`.
 
 ## Arguments
 
