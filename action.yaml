@@ -207,6 +207,12 @@ runs:
         kind: ${{ steps.define-build.outputs.kind }}
         skip_test: ${{ inputs.skip_test }}
         version: ${{ steps.define-build.outputs.version }}
+    - uses: ncipollo/release-action@v1
+      with:
+        tag: ${{ steps.clq-extract.outputs.tag }}
+        prerelease: ${{ steps.clq-extract.outputs.status == 'prereleased' }}
+        name: ${{ steps.clq-extract.outputs.name }}
+        body: ${{ steps.clq-extract.outputs.changes }}
     - name: "Remove tag of failed build"
       if: failure() && steps.build.outcome == 'failure'
       shell: bash

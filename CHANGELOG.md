@@ -23,6 +23,7 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
 ### Added
 
 - When publishing from a feature branch, appends the job/run/attempt identifiers to the version to ensure unique artifacts.
+- Create a release after tagging.
 
 ## [1.2.1] - 2025-05-06
 
