@@ -18,6 +18,13 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
   - `Fixed` for any bugfixes.
   - `Security` in case of vulnerabilities.
 
+## [1.3.0] - 2025-05-08
+
+### Added
+
+- When publishing from a feature branch, appends the job/run/attempt identifiers to the version to ensure unique artifacts.
+- Create a release after tagging.
+
 ## [1.2.1] - 2025-05-06
 
 ### Fixed
@@ -29,7 +36,7 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
 ### Added
 
 - When the gradle build fails, attach all the reports to the
-  [worhflow artifacts](https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/storing-and-sharing-data-from-a-workflow)
+  [workflow artifacts](https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/storing-and-sharing-data-from-a-workflow)
 
 ## [1.1.0] - 2025-03-31
 

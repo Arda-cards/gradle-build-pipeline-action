@@ -124,13 +124,14 @@ runs:
       run: |
         [ "${{ runner.debug }}" == 1 ] && set -xv
         set -u
-        
+
         function is_release_branch() {
             if [ "${{ github.ref }}" == "refs/heads/main" ]; then
                 return 0
             fi
             return 1
         }
+
         function is_feature_branch_version() {
           # major.minor.patch-user-issue
           # user and issue relaxed to be any alpha-numeric sequence 
@@ -139,13 +140,14 @@ runs:
           fi
           return 1
         }
+
         function is_publishable_feature_branch() {
           if ( [ "${{ github.event_name }}" == "push" ] && is_feature_branch_version ); then
             return 0
           fi
           return 1
         }
-        
+
         if [ "${{ steps.define-version-validation.outputs.mode }}" == "release" ] \
             && [ "${{ steps.clq-extract.outputs.status }}" != "released" ]; then
           echo "::error ${{ steps.clq-extract.outputs.version }} is not a valid version for the default branch"
@@ -154,9 +156,13 @@ runs:
           echo "${{ steps.clq-extract.outputs.version }} is not valid" >>${GITHUB_STEP_SUMMARY}
           exit 1
         fi
-        
-        if is_release_branch || is_publishable_feature_branch; then
+
+        if is_release_branch; then
           echo "kind=publish" >>"${GITHUB_OUTPUT}"
+          echo "version=${{ steps.clq-extract.outputs.version }}" >>"${GITHUB_OUTPUT}"
+        elif is_publishable_feature_branch; then
+          echo "kind=publish" >>"${GITHUB_OUTPUT}"
+          echo "version=${{ steps.clq-extract.outputs.version }}-${{ github.run_id }}.${{ github.run_number }}.${{ github.run_attempt }}" >>"${GITHUB_OUTPUT}"
         else
           echo "kind=test" >>"${GITHUB_OUTPUT}"
         fi
@@ -197,10 +203,16 @@ runs:
         gpr_user: ${{ inputs.gpr_user }}
         gpr_key: ${{ inputs.gpr_key }}
         docker_registry: ${{ inputs.docker_registry }}
-        kind: ${{ steps.define-build.outputs.kind }}
         helm_registry: ${{ inputs.helm_registry }}
+        kind: ${{ steps.define-build.outputs.kind }}
         skip_test: ${{ inputs.skip_test }}
-        version: ${{ steps.clq-extract.outputs.version }}
+        version: ${{ steps.define-build.outputs.version }}
+    - uses: ncipollo/release-action@v1
+      with:
+        tag: ${{ steps.clq-extract.outputs.tag }}
+        prerelease: ${{ steps.clq-extract.outputs.status == 'prereleased' }}
+        name: ${{ steps.clq-extract.outputs.name }}
+        body: ${{ steps.clq-extract.outputs.changes }}
     - name: "Remove tag of failed build"
       if: failure() && steps.build.outcome == 'failure'
       shell: bash
