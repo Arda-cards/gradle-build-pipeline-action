@@ -208,6 +208,7 @@ runs:
         skip_test: ${{ inputs.skip_test }}
         version: ${{ steps.define-build.outputs.version }}
     - uses: ncipollo/release-action@v1
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       with:
         tag: ${{ steps.clq-extract.outputs.tag }}
         prerelease: ${{ steps.clq-extract.outputs.status == 'prereleased' }}
