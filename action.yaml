@@ -106,7 +106,7 @@ runs:
         else
           echo "mode=feature" >>"${GITHUB_OUTPUT}"
         fi
-    - uses: actions/setup-java@v4
+    - uses: actions/setup-java@v5
       with:
         distribution: ${{ steps.read-tools-choice.outputs.java_vendor }}
         java-version: ${{ steps.read-tools-choice.outputs.java_version }}
