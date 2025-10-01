@@ -25,6 +25,7 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
 - Failed to read the helm version
 - Automatically annotate new pull-requests with the *assignee*, the *project*, the *iteration* and the *status*.
   It is an asynchronous event-based process that might take a minute or two to complete.
+- Best to setup gradle before using it to read the module name
 
 ## [1.3.1] - 2025-05-09
 

@@ -34,14 +34,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - id: read-module-info
-      name: "Read module information"
-      shell: bash
-      run: |
-        [ "${{ runner.debug }}" == 1 ] && set -xv
-        set -u
-
-        echo "name=$(./gradlew -q properties | grep ^name: | cut -d: -f 2 | tr -d ' ')" >>"${GITHUB_OUTPUT}"
     - id: read-tools-choice
       name: "Read tools version"
       shell: bash
@@ -111,6 +103,14 @@ runs:
         distribution: ${{ steps.read-tools-choice.outputs.java_vendor }}
         java-version: ${{ steps.read-tools-choice.outputs.java_version }}
     - uses: gradle/actions/setup-gradle@v4
+    - id: read-module-info
+      name: "Read module information"
+      shell: bash
+      run: |
+        [ "${{ runner.debug }}" == 1 ] && set -xv
+        set -u
+
+        echo "name=$(./gradlew -q properties | grep ^name: | cut -d: -f 2 | tr -d ' ')" >>"${GITHUB_OUTPUT}"
     - uses: azure/setup-helm@v4
       if: ${{ steps.read-tools-choice.outputs.helm_version }}
       with:
