@@ -78,7 +78,7 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
 ### Fixed
 
 - Git requires a message when tagging
-- Bad multi-line test in bash
+- Bad multi-line test in Bash
 
 ## [1.0.0] - 2025-03-04
 
