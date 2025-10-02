@@ -18,6 +18,15 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
   - `Fixed` for any bugfixes.
   - `Security` in case of vulnerabilities.
 
+## [1.3.2] - 2025-10-01
+
+### Fixed
+
+- Failed to read the helm version
+- Automatically annotate new pull-requests with the *assignee*, the *project*, the *iteration* and the *status*.
+  It is an asynchronous event-based process that might take a minute or two to complete.
+- Best to setup gradle before using it to read the module name
+
 ## [1.3.1] - 2025-05-09
 
 ### Fixed
@@ -69,7 +78,7 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
 ### Fixed
 
 - Git requires a message when tagging
-- Bad multi-line test in bash
+- Bad multi-line test in Bash
 
 ## [1.0.0] - 2025-03-04
 
