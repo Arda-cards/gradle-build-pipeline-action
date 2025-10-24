@@ -25,6 +25,7 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
 - Bump actions/checkout from 4 to 5
 - Bump actions/setup-java from 4 to 5
 - Bump gradle/actions from 4 to 5
+- Bump super-linter/super-linter from 7 to 8
 
 ## [1.3.2] - 2025-10-01
 
