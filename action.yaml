@@ -151,15 +151,6 @@ runs:
           return 1
         }
 
-        if [ "${{ steps.define-version-validation.outputs.mode }}" == "release" ] \
-            && [ "${{ steps.clq-extract.outputs.status }}" != "released" ]; then
-          echo "::error ${{ steps.clq-extract.outputs.version }} is not a valid version for the default branch"
-          echo "# Version Validation Error" >>${GITHUB_STEP_SUMMARY}
-          echo "Main, or a pull-request to main, must have a release version." >>${GITHUB_STEP_SUMMARY}
-          echo "${{ steps.clq-extract.outputs.version }} is not valid" >>${GITHUB_STEP_SUMMARY}
-          exit 1
-        fi
-
         if is_release_branch; then
           echo "kind=publish" >>"${GITHUB_OUTPUT}"
           echo "version=${{ steps.clq-extract.outputs.version }}" >>"${GITHUB_OUTPUT}"
