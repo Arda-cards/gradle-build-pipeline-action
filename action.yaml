@@ -229,7 +229,7 @@ runs:
         fi
     - name: Store reports
       if: failure() && steps.build.outcome == 'failure'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: reports
         if-no-files-found: ignore
