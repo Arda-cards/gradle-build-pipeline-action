@@ -73,31 +73,28 @@ runs:
         
         git config user.name "${{ github.actor }}"
         git config user.email "${{ github.actor }}@users.noreply.github.com"
-    - id: define-version-validation
-      name: "Is a release or a feature version needed?"
+    - id: qualify-build
+      name: "Qualify build type"
       shell: bash
       run: |
         [ "${{ runner.debug }}" == 1 ] && set -xv
         set -u
-        
-        function is_release_branch() {
-            if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-                return 0
-            fi
-            return 1
-        }
-        function is_main_pull_request() {
-            if [ "${{ github.event_name }}" == "pull_request" ] \
-                && [ "${{ github.event.pull_request.base.ref }}" == "main" ]; then
-                return 0
-            fi
-            return 1
-        }
-        if is_release_branch || is_main_pull_request; then
-          echo "mode=release" >>"${GITHUB_OUTPUT}"
-        else
-          echo "mode=feature" >>"${GITHUB_OUTPUT}"
+
+        mode=feature_branch
+        if [ "${{ github.ref }}" == "refs/heads/main" ] \
+            || [[ "${{ github.ref }}" =~ ^refs/heads/main_[0-9]+$ ]]; then
+          mode=push_to_release_branch
         fi
+
+        if [ "${{ github.event_name }}" == "pull_request" ] \
+            && (
+              [ "${{ github.event.pull_request.base.ref }}" == "main" ] \
+              || [[ "${{ github.event.pull_request.base.ref }}" =~ ^main_[0-9]+$ ]]
+            ); then
+          mode=pull_request_to_release_branch
+        fi
+        echo "::notice::mode is ${mode}"
+        echo "mode=${mode}" >>"${GITHUB_OUTPUT}"
     - uses: actions/setup-java@v5
       with:
         distribution: ${{ steps.read-tools-choice.outputs.java_vendor }}
@@ -110,14 +107,37 @@ runs:
         [ "${{ runner.debug }}" == 1 ] && set -xv
         set -u
 
-        echo "name=$(./gradlew -q properties | grep ^name: | cut -d: -f 2 | tr -d ' ')" >>"${GITHUB_OUTPUT}"
+        name="$(./gradlew -q properties | grep ^name: | cut -d: -f 2 | tr -d ' ')"
+        echo "::notice::name is ${name}"
+        echo "name=${name}" >>"${GITHUB_OUTPUT}"
     - uses: azure/setup-helm@v4
       if: ${{ steps.read-tools-choice.outputs.helm_version }}
       with:
         version: ${{ steps.read-tools-choice.outputs.helm_version }}
-    - name: "Extract tag from the changelog"
+    - id: define-version-validation
+      name: "Is a release or a feature version needed?"
+      shell: bash
+      run: |
+        [ "${{ runner.debug }}" == 1 ] && set -xv
+        set -u
+        
+        case "${{ steps.qualify-build.outputs.mode }}" in
+          feature_branch)
+            mode=feature
+            ;;
+          push_to_release_branch | pull_request_to_release_branch)
+            mode=release
+            ;;
+          *)
+            echo "::error::Unknown mode ${{ steps.qualify-build.outputs.mode }}"
+            exit 1
+            ;;
+        esac
+        echo "::notice::mode is ${mode}"
+        echo "mode=${mode}" >>"${GITHUB_OUTPUT}"
+    - id: clq-extract
+      name: "Extract tag from the changelog"
       uses: denisa/clq-action@v1
-      id: clq-extract
       with:
         changeMap: .github/clq/changemap.json
         mode: ${{ steps.define-version-validation.outputs.mode }}
@@ -128,17 +148,10 @@ runs:
         [ "${{ runner.debug }}" == 1 ] && set -xv
         set -u
 
-        function is_release_branch() {
-            if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-                return 0
-            fi
-            return 1
-        }
-
         function is_feature_branch_version() {
           # major.minor.patch-user-issue
           # user and issue relaxed to be any alpha-numeric sequence 
-          if [[ "${{ steps.clq-extract.outputs.version }}" =~  ^[0-9]+(\.[0-9]+){2}(-[[:alnum:]]+){2}(-.+)?$ ]]; then
+          if [[ "${{ steps.clq-extract.outputs.version }}" =~ ^[0-9]+(\.[0-9]+){2}(-[[:alnum:]]+){2}(-.+)?$ ]]; then
             return 0
           fi
           return 1
@@ -151,40 +164,37 @@ runs:
           return 1
         }
 
-        if is_release_branch; then
-          echo "kind=publish" >>"${GITHUB_OUTPUT}"
-          echo "version=${{ steps.clq-extract.outputs.version }}" >>"${GITHUB_OUTPUT}"
+        if [ "${{ steps.qualify-build.outputs.mode }}" == "push_to_release_branch" ]; then
+          kind=publish
+          version="${{ steps.clq-extract.outputs.version }}"
         elif is_publishable_feature_branch; then
-          echo "kind=publish" >>"${GITHUB_OUTPUT}"
-          echo "version=${{ steps.clq-extract.outputs.version }}-${{ github.run_id }}.${{ github.run_number }}.${{ github.run_attempt }}" >>"${GITHUB_OUTPUT}"
+          kind=publish
+          version="${{ steps.clq-extract.outputs.version }}-${{ github.run_id }}.${{ github.run_number }}.${{ github.run_attempt }}"
         else
-          echo "kind=test" >>"${GITHUB_OUTPUT}"
+          kind=test
         fi
+        echo "::notice::kind is ${kind}"
+        echo "kind=${kind}" >>"${GITHUB_OUTPUT}"
+        echo "::notice::version is ${version:-undefined}"
+        if [ -v version ]; then echo "version=${version}" >>"${GITHUB_OUTPUT}"; fi
     - name: "Tag source"
       shell: bash
       run: |
         [ "${{ runner.debug }}" == 1 ] && set -xv
         set -u
         
-        function is_release_branch() {
-          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            return 0
-          fi
-          return 1
-        }
-        
         readonly tag="${{ steps.clq-extract.outputs.tag }}"
-        if is_release_branch ; then
+        if [ "${{ steps.qualify-build.outputs.mode }}" == "push_to_release_branch" ]; then
           if [ "${{ steps.define-build.outputs.kind }}" == "publish" ]; then
-            echo "Tagging ${tag}"
+            echo "::notice::Tagging ${tag}"
             readonly workflow_run="${{ github.run_id }}.${{ github.run_number }}.${{ github.run_attempt }}"
             git tag -m "Released by ${{ github.job }}, ${workflow_run}" -a "${tag}"
             git push origin "${tag}"
           fi
         elif [ "${{ steps.define-version-validation.outputs.mode}}" == "release" ]; then
-          echo "Looking for existing ${tag}"
+          echo "::notice::Looking for existing ${tag}"
           if git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null 2>&1; then
-            echo "::error ::tag $tag exists already"
+            echo "::error::tag $tag exists already"
             exit 1
           fi
         fi
@@ -202,7 +212,7 @@ runs:
         skip_test: ${{ inputs.skip_test }}
         version: ${{ steps.define-build.outputs.version }}
     - uses: ncipollo/release-action@v1
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      if: steps.qualify-build.outputs.mode == 'push_to_release_branch'
       with:
         tag: ${{ steps.clq-extract.outputs.tag }}
         prerelease: ${{ steps.clq-extract.outputs.status == 'prereleased' }}
@@ -215,21 +225,15 @@ runs:
         [ "${{ runner.debug }}" == 1 ] && set -xv
         set -u
         
-        function is_release_branch() {
-          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            return 0
-          fi
-            return 1
-        }
-        
-        if [ "${{ steps.define-build.outputs.kind }}" == "publish" ] && is_release_branch ; then
+        if [ "${{ steps.define-build.outputs.kind }}" == "publish" ] \
+            && [ "${{ steps.qualify-build.outputs.mode }}" == "push_to_release_branch" ] ; then
           readonly tag="${{ steps.clq-extract.outputs.tag }}"
-          echo "Removing tag ${tag}"
+          echo "::notice::Removing tag ${tag}"
           git push --delete origin "${tag}"
         fi
     - name: Store reports
       if: failure() && steps.build.outcome == 'failure'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: reports
         if-no-files-found: ignore

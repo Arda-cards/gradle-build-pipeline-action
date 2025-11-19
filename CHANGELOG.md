@@ -18,6 +18,15 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
   - `Fixed` for any bugfixes.
   - `Security` in case of vulnerabilities.
 
+## [1.3.4] - 2025-11-19
+
+### Fixed
+
+- Rely on the branch protection rules for the project build.
+- Action considers `main` and `main_*` as release branches.
+- Bump actions/upload-artifact from 4 to 5
+- `make lint` calls `clq` and `super-linter` to get better error reporting.
+
 ## [1.3.3] - 2025-10-24
 
 ### Fixed
