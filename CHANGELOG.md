@@ -28,6 +28,7 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
 - Bump `actions/upload-artifact` from 5 to 7
 - `pull_request_upkeep.yml` uses GitHub variable to identify the project.
 - Protected branches allow only release versions.
+- Inline the `gradle-build-action` to avoid the overhead of an extra checkout and of maintaining a separate repository for it.
 
 ## [1.3.4] - 2025-11-19
 
