@@ -25,6 +25,7 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
 - Bump `actions/checkout` from 5 to 6
 - Bump `azure/setup-helm` from 4 to 5
 - Bump `gradle/actions` from 5 to 6
+- Bump `actions/upload-artifact` from 5 to 7
 
 ## [1.3.4] - 2025-11-19
 
