@@ -150,7 +150,7 @@ runs:
 
         function is_feature_branch_version() {
           # major.minor.patch-user-issue
-          # user and issue relaxed to be any alpha-numeric sequence 
+          # user and issue relaxed to be any alphanumeric sequence 
           if [[ "${{ steps.clq-extract.outputs.version }}" =~ ^[0-9]+(\.[0-9]+){2}(-[[:alnum:]]+){2}(-.+)?$ ]]; then
             return 0
           fi
@@ -166,10 +166,10 @@ runs:
 
         if [ "${{ steps.define-version-validation.outputs.mode }}" == "release" ] \
             && [ "${{ steps.clq-extract.outputs.status }}" != "released" ]; then
-          echo "::error ${{ steps.clq-extract.outputs.version }} is not a valid version for the default branch"
+          echo "::error::${{ steps.clq-extract.outputs.version }} is not a valid version for a release branch"
           echo "# Version Validation Error" >>${GITHUB_STEP_SUMMARY}
-          echo "Main, or a pull-request to main, must have a release version." >>${GITHUB_STEP_SUMMARY}
-          echo "${{ steps.clq-extract.outputs.version }} is not valid" >>${GITHUB_STEP_SUMMARY}
+          echo "Release branches, or a pull requests targeting them, must have a release version." >>${GITHUB_STEP_SUMMARY}
+          echo "${{ steps.clq-extract.outputs.version }} is not valid for release branches" >>${GITHUB_STEP_SUMMARY}
           exit 1
         fi
 
@@ -208,11 +208,12 @@ runs:
           fi
         fi
     - id: build
+      name: "Build, test and publish"
       shell: bash
-      run: ${{ github.action_path }}/action.sh
+      run: ${{ github.action_path }}/gradle-build.sh
       env:
         DOCKER_REGISTRY: ${{ inputs.docker_registry }}
-        GITHUB_TOKEN: ${{ github.token  }}
+        GITHUB_TOKEN: ${{ inputs.token  }}
         GPR_USER: ${{ inputs.gpr_user }}
         GPR_KEY:  ${{ inputs.gpr_key }}
         HELM_REGISTRY: ${{ inputs.helm_registry }}
