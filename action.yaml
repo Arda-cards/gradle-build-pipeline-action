@@ -166,7 +166,7 @@ runs:
 
         if [ "${{ steps.define-version-validation.outputs.mode }}" == "release" ] \
             && [ "${{ steps.clq-extract.outputs.status }}" != "released" ]; then
-          echo "::error ${{ steps.clq-extract.outputs.version }} is not a valid version for the default branch"
+          echo "::error::${{ steps.clq-extract.outputs.version }} is not a valid version for the default branch"
           echo "# Version Validation Error" >>${GITHUB_STEP_SUMMARY}
           echo "Main, or a pull-request to main, must have a release version." >>${GITHUB_STEP_SUMMARY}
           echo "${{ steps.clq-extract.outputs.version }} is not valid" >>${GITHUB_STEP_SUMMARY}
@@ -208,11 +208,12 @@ runs:
           fi
         fi
     - id: build
+      name: "Build, test and publish"
       shell: bash
-      run: ${{ github.action_path }}/action.sh
+      run: ${{ github.action_path }}/gradle-build.sh
       env:
         DOCKER_REGISTRY: ${{ inputs.docker_registry }}
-        GITHUB_TOKEN: ${{ github.token  }}
+        GITHUB_TOKEN: ${{ inputs.token  }}
         GPR_USER: ${{ inputs.gpr_user }}
         GPR_KEY:  ${{ inputs.gpr_key }}
         HELM_REGISTRY: ${{ inputs.helm_registry }}

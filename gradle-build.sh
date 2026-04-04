@@ -9,7 +9,6 @@ echo "::group::Initialize locale"
 sudo locale-gen en_US
 sudo locale-gen en_US.UTF-8
 locale -a
-LANG=en_US.UTF-8
 LC_ALL=en_US.UTF-8
 export LANG
 export LC_ALL
@@ -29,12 +28,12 @@ test) ;;
 publish)
   gradle_arguments+=("publish")
   if [ -z "${VERSION}" ]; then
-    echo "::error Version required to publish"
+    echo "::error::Version required to publish"
     exit 1
   fi
   ;;
 *)
-  echo "::error Unknown value ${KIND}, has to be one of (publish|test)"
+  echo "::error::Unknown value ${KIND}, has to be one of (publish|test)"
   exit 1
   ;;
 esac
@@ -53,7 +52,7 @@ if [ "${KIND}" = "publish" ]; then
   if [ -f "${chartTgz}" ]; then
     echo "::group::Publish Helm"
     echo "Pushing chart ${chartTgz} to ${HELM_REGISTRY}"
-    echo "${GITHUB_TOKEN}" | helm registry login ghcr.io -u $ --password-stdin
+    echo "${GITHUB_TOKEN}" | helm registry login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
     helm push "${chartTgz}" "${HELM_REGISTRY}"
 
     declare -A chartProperties
@@ -70,11 +69,11 @@ if [ "${KIND}" = "publish" ]; then
   jib_tar=build/jib-image.tar
   if [ -f "${jib_json}" ] && [ -f "${jib_tar}" ]; then
     echo "::group::Publish Docker"
-    image=$(jq -r '( .image + ":" + . .tags[0] )' <"${jib_json}")
+    image=$(jq -r '(.image + ":" + .tags[0])' <"${jib_json}")
     remote_image="${DOCKER_REGISTRY}/${image}"
 
     echo "Pushing docker ${image} to ${remote_image}"
-    echo "${GITHUB_TOKEN}" | docker login ghcr.io -u $ --password-stdin
+    echo "${GITHUB_TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
     docker image load --input "${jib_tar}"
     docker tag "${image}" "${remote_image}"
     docker push "${remote_image}"
