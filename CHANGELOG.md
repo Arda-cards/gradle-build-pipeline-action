@@ -23,6 +23,7 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
 ### Fixed
 
 - Bump `actions/checkout` from 5 to 6
+- Bump `azure/setup-helm` from 4 to 5
 
 ## [1.3.4] - 2025-11-19
 

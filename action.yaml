@@ -110,7 +110,7 @@ runs:
         name="$(./gradlew -q properties | grep ^name: | cut -d: -f 2 | tr -d ' ')"
         echo "::notice::name is ${name}"
         echo "name=${name}" >>"${GITHUB_OUTPUT}"
-    - uses: azure/setup-helm@v4
+    - uses: azure/setup-helm@v5
       if: ${{ steps.read-tools-choice.outputs.helm_version }}
       with:
         version: ${{ steps.read-tools-choice.outputs.helm_version }}
