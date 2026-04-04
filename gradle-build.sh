@@ -67,14 +67,17 @@ if [ "${KIND}" = "publish" ]; then
 
   jib_json=build/jib-image.json
   jib_tar=build/jib-image.tar
-  if [ -f "${jib_json}" ] && [ -f "${jib_tar}" ]; then
+  if [ -f "${jib_json}" ]; then
     echo "::group::Publish Docker"
     image=$(jq -r '(.image + ":" + .tags[0])' <"${jib_json}")
     remote_image="${DOCKER_REGISTRY}/${image}"
 
     echo "Pushing docker ${image} to ${remote_image}"
     echo "${GITHUB_TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
-    docker image load --input "${jib_tar}"
+    if [ -f "${jib_tar}" ]; then
+      # the project used jib to build the image and export it as tar, we need to load it before pushing
+      docker image load --input "${jib_tar}"
+    fi
     docker tag "${image}" "${remote_image}"
     docker push "${remote_image}"
     echo "::endgroup::"

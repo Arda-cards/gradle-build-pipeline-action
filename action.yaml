@@ -167,9 +167,11 @@ runs:
         if [ "${{ steps.define-version-validation.outputs.mode }}" == "release" ] \
             && [ "${{ steps.clq-extract.outputs.status }}" != "released" ]; then
           echo "::error::${{ steps.clq-extract.outputs.version }} is not a valid version for a release branch"
-          echo "# Version Validation Error" >>${GITHUB_STEP_SUMMARY}
-          echo "Release branches, or a pull requests targeting them, must have a release version." >>${GITHUB_STEP_SUMMARY}
-          echo "${{ steps.clq-extract.outputs.version }} is not valid for release branches" >>${GITHUB_STEP_SUMMARY}
+          {
+            echo "# Version Validation Error"
+            echo "Release branches, or a pull requests targeting them, must have a release version."
+            echo "${{ steps.clq-extract.outputs.version }} is not valid for release branches"
+          } >>${ GITHUB_STEP_SUMMARY }
           exit 1
         fi
 
@@ -191,7 +193,7 @@ runs:
       run: |
         [ "${{ runner.debug }}" == 1 ] && set -xv
         set -u
-        
+  
         readonly tag="${{ steps.clq-extract.outputs.tag }}"
         if [ "${{ steps.qualify-build.outputs.mode }}" == "push_to_release_branch" ]; then
           if [ "${{ steps.define-build.outputs.kind }}" == "publish" ]; then
@@ -233,7 +235,7 @@ runs:
       run: |
         [ "${{ runner.debug }}" == 1 ] && set -xv
         set -u
-        
+  
         if [ "${{ steps.define-build.outputs.kind }}" == "publish" ] \
             && [ "${{ steps.qualify-build.outputs.mode }}" == "push_to_release_branch" ] ; then
           readonly tag="${{ steps.clq-extract.outputs.tag }}"
