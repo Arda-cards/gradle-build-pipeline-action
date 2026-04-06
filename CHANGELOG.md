@@ -18,7 +18,13 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
   - `Fixed` for any bugfixes.
   - `Security` in case of vulnerabilities.
 
-## [1.3.5] - 2026-04-04
+## [1.3.6] - 2026-04-06
+
+### Fixed
+
+- Auto-reformatting `action.yaml` broke its syntax; fix it.
+
+## [1.3.5] - 2026-04-04 [YANKED]
 
 ### Fixed
 
