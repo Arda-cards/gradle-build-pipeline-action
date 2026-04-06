@@ -169,9 +169,9 @@ runs:
           echo "::error::${{ steps.clq-extract.outputs.version }} is not a valid version for a release branch"
           {
             echo "# Version Validation Error"
-            echo "Release branches, or a pull requests targeting them, must have a release version."
+            echo "Release branches, or a pull request targeting them, must have a release version."
             echo "${{ steps.clq-extract.outputs.version }} is not valid for release branches"
-          } >>${ GITHUB_STEP_SUMMARY }
+          } >>"${GITHUB_STEP_SUMMARY}"
           exit 1
         fi
 
