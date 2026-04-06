@@ -9,6 +9,7 @@ echo "::group::Initialize locale"
 sudo locale-gen en_US
 sudo locale-gen en_US.UTF-8
 locale -a
+LANG=en_US.UTF-8
 LC_ALL=en_US.UTF-8
 export LANG
 export LC_ALL
