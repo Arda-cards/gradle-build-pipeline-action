@@ -1,7 +1,7 @@
 # changelog
 
 [![Keep a Changelog](https://img.shields.io/badge/Keep%20a%20Changelog-1.0.0-informational)](https://keepachangelog.com/en/1.0.0/)
-[![Semantic Versioning](https://img.shields.io/badge/Sematic%20Versioning-2.0.0-informational)](https://semver.org/spec/v2.0.0.html)
+[![Semantic Versioning](https://img.shields.io/badge/Semantic%20Versioning-2.0.0-informational)](https://semver.org/spec/v2.0.0.html)
 ![clq validated](https://img.shields.io/badge/clq-validated-success)
 
 Keep the newest entry at top, format date according to ISO 8601: `YYYY-MM-DD`.
@@ -18,23 +18,36 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
   - `Fixed` for any bugfixes.
   - `Security` in case of vulnerabilities.
 
+## [1.3.5] - 2026-04-04
+
+### Fixed
+
+- Bump `actions/checkout` from 5 to 6
+- Bump `azure/setup-helm` from 4 to 5
+- Bump `gradle/actions` from 5 to 6
+- Bump `actions/upload-artifact` from 5 to 7
+- `pull_request_upkeep.yml` uses GitHub variable to identify the project.
+- Protected branches allow only release versions.
+- Inline the `gradle-build-action` to avoid the overhead of an extra checkout and of maintaining a separate repository for it.
+- Support Docker images built with Jib and those built with a Dockerfile.
+
 ## [1.3.4] - 2025-11-19
 
 ### Fixed
 
 - Rely on the branch protection rules for the project build.
 - Action considers `main` and `main_*` as release branches.
-- Bump actions/upload-artifact from 4 to 5
+- Bump `actions/upload-artifact` from 4 to 5
 - `make lint` calls `clq` and `super-linter` to get better error reporting.
 
 ## [1.3.3] - 2025-10-24
 
 ### Fixed
 
-- Bump actions/checkout from 4 to 5
-- Bump actions/setup-java from 4 to 5
-- Bump gradle/actions from 4 to 5
-- Bump super-linter/super-linter from 7 to 8
+- Bump `actions/checkout` from 4 to 5
+- Bump `actions/setup-java` from 4 to 5
+- Bump `gradle/actions` from 4 to 5
+- Bump `super-linter/super-linter` from 7 to 8
 - Protected branches allow both release and prerelease versions.
 
 ## [1.3.2] - 2025-10-01
