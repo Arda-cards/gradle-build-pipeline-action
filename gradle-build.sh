@@ -13,7 +13,7 @@ export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 echo "::endgroup::"
 
-export USERNAME=${GITHUB_ACTOR}
+export USERNAME="${GITHUB_ACTOR}"
 
 gradle_arguments=()
 if [ "${VERSION}" ]; then
