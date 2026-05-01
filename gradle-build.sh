@@ -53,7 +53,9 @@ if [ "${KIND}" = "publish" ]; then
   if [ -f "${chartTgz}" ]; then
     echo "::group::Publish Helm"
     echo "Pushing chart ${chartTgz} to ${HELM_REGISTRY}"
-    echo "${TOKEN}" | helm registry login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+
+    helm_registry_host="${HELM_REGISTRY#oci://}"
+    echo "${TOKEN}" | helm registry login "${helm_registry_host%%/*}" -u "${USERNAME}" --password-stdin
     helm push "${chartTgz}" "${HELM_REGISTRY}"
 
     declare -A chartProperties
@@ -74,7 +76,7 @@ if [ "${KIND}" = "publish" ]; then
     remote_image="${DOCKER_REGISTRY}/${image}"
 
     echo "Pushing docker ${image} to ${remote_image}"
-    echo "${TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+    echo "${TOKEN}" | docker login "${DOCKER_REGISTRY%%/*}" -u "${USERNAME}" --password-stdin
     if [ -f "${jib_tar}" ]; then
       # the project used jib to build the image and export it as tar, we need to load it before pushing
       docker image load --input "${jib_tar}"
