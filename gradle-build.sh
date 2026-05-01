@@ -9,11 +9,11 @@ echo "::group::Initialize locale"
 sudo locale-gen en_US
 sudo locale-gen en_US.UTF-8
 locale -a
-LANG=en_US.UTF-8
-LC_ALL=en_US.UTF-8
-export LANG
-export LC_ALL
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
 echo "::endgroup::"
+
+export USERNAME=${GITHUB_ACTOR}
 
 gradle_arguments=()
 if [ "${VERSION}" ]; then
@@ -53,7 +53,7 @@ if [ "${KIND}" = "publish" ]; then
   if [ -f "${chartTgz}" ]; then
     echo "::group::Publish Helm"
     echo "Pushing chart ${chartTgz} to ${HELM_REGISTRY}"
-    echo "${GITHUB_TOKEN}" | helm registry login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+    echo "${TOKEN}" | helm registry login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
     helm push "${chartTgz}" "${HELM_REGISTRY}"
 
     declare -A chartProperties
@@ -74,7 +74,7 @@ if [ "${KIND}" = "publish" ]; then
     remote_image="${DOCKER_REGISTRY}/${image}"
 
     echo "Pushing docker ${image} to ${remote_image}"
-    echo "${GITHUB_TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+    echo "${TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
     if [ -f "${jib_tar}" ]; then
       # the project used jib to build the image and export it as tar, we need to load it before pushing
       docker image load --input "${jib_tar}"

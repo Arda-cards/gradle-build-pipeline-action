@@ -18,6 +18,12 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
   - `Fixed` for any bugfixes.
   - `Security` in case of vulnerabilities.
 
+## [1.3.7] - 2026-05-01
+
+### Fixed
+
+- Restore the contract: calls gradle with `TOKEN` and `USERNAME` environment variables.
+
 ## [1.3.6] - 2026-04-06
 
 ### Fixed
