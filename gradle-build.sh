@@ -14,6 +14,7 @@ export LC_ALL=en_US.UTF-8
 echo "::endgroup::"
 
 export USERNAME="${GITHUB_ACTOR}"
+echo "::add-mask::${TOKEN}"
 
 gradle_arguments=()
 if [ "${VERSION}" ]; then
