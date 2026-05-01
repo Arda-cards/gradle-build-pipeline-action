@@ -18,11 +18,20 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
   - `Fixed` for any bugfixes.
   - `Security` in case of vulnerabilities.
 
-## [1.3.6] - 2026-04-06
+## [1.3.7] - 2026-05-01
+
+### Fixed
+
+- Restore the contract: calls gradle with `TOKEN` and `USERNAME` environment variables.
+- Yank 1.3.6
+- Do not hardcode the registries hostname, derive them from the configured environment variables.
+
+## [1.3.6] - 2026-04-06 [YANKED]
 
 ### Fixed
 
 - Auto-reformatting `action.yaml` broke its syntax; fix it.
+- Yank 1.3.5
 
 ## [1.3.5] - 2026-04-04 [YANKED]
 

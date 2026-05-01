@@ -215,12 +215,12 @@ runs:
       run: ${{ github.action_path }}/gradle-build.sh
       env:
         DOCKER_REGISTRY: ${{ inputs.docker_registry }}
-        GITHUB_TOKEN: ${{ inputs.token  }}
         GPR_USER: ${{ inputs.gpr_user }}
         GPR_KEY:  ${{ inputs.gpr_key }}
         HELM_REGISTRY: ${{ inputs.helm_registry }}
         KIND: ${{ steps.define-build.outputs.kind }}
         SKIP_TEST: ${{ inputs.skip_test }}
+        TOKEN: ${{ inputs.token }}
         VERSION: ${{ steps.define-build.outputs.version }}
     - uses: ncipollo/release-action@v1
       if: steps.qualify-build.outputs.mode == 'push_to_release_branch'
