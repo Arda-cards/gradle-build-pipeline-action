@@ -23,7 +23,7 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
 ### Fixed
 
 - Restore the contract: calls gradle with `TOKEN` and `USERNAME` environment variables.
-- Do not hardcode the registries host name, derive them from the configured environment variables.
+- Do not hardcode the registries hostname, derive them from the configured environment variables.
 
 ## [1.3.6] - 2026-04-06
 
