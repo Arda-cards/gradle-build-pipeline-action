@@ -23,6 +23,7 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
 ### Fixed
 
 - Bump `actions/checkout` from 6 to 7
+- Use shared logic from `Arda-cards/qualify-build-action` 2.
 
 ## [1.3.7] - 2026-05-01
 
