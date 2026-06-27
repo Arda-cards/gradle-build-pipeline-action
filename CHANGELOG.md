@@ -18,11 +18,13 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
   - `Fixed` for any bugfixes.
   - `Security` in case of vulnerabilities.
 
+
 ## [1.3.8] - 2026-06-24
 
 ### Fixed
 
 - Bump `actions/checkout` from 6 to 7
+- Use shared logic from `Arda-cards/qualify-build-action` 2. 
 
 ## [1.3.7] - 2026-05-01
 
