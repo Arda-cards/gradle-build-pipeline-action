@@ -94,6 +94,8 @@ runs:
         echo "name=${name}" >>"${GITHUB_OUTPUT}"
     - uses: Arda-cards/qualify-build-action@v2
       id: qualify-build
+      with:
+        workflow_name: "context:build"
     - name: "Tag source"
       shell: bash
       run: |
