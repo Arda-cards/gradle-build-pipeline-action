@@ -18,6 +18,12 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
   - `Fixed` for any bugfixes.
   - `Security` in case of vulnerabilities.
 
+## [1.3.9] - 2026-06-29
+
+### Fixed
+
+- In a gradle build pipeline, `build` is reuired, not `validate-release`.
+
 ## [1.3.8] - 2026-06-24
 
 ### Fixed
