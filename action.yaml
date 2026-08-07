@@ -6,6 +6,14 @@ inputs:
     description: "Directory holding per-pull-request changelog files; passed to qualify-build-action."
     required: false
     default: .changelog
+  codeql:
+    description: >-
+      Analyse the Kotlin and Java sources with CodeQL around the build (true|false).
+      The calling job must grant `security-events: write`; a composite action cannot
+      grant it, and CodeQL fails without it. Defaults to false so that releasing this
+      action does not break consumers that have not yet added the permission.
+    required: false
+    default: "false"
   docker_registry:
     description: "The registry to persist Docker images"
     required: true
@@ -129,6 +137,27 @@ runs:
             exit 1
           fi
         fi
+    # CodeQL wraps the build rather than running its own. For a compiled
+    # language the extractor observes the compiler, so it needs *a* build — and
+    # the cheapest build to observe is the one this action already runs. That is
+    # also what gives it the Gradle cache from setup-gradle above, the JDK, buf
+    # and the package credentials, none of which CodeQL's own autobuild has:
+    # measured 2026-08-07, autobuild failed on `accounts` for an unresolvable
+    # cards.arda.common:lib and on `operations` for a missing `buf`.
+    #
+    # Skipped on the release build. The same tree was already analysed on the
+    # pull request and again in the queue, and a third pass would only lengthen
+    # the path between a merge and a published artifact.
+    - id: codeql-init
+      if: >-
+        inputs.codeql == 'true'
+        && steps.qualify-build.outputs.trigger != 'push_to_release_branch'
+      uses: github/codeql-action/init@v4
+      with:
+        languages: java-kotlin
+        # `manual` means "I will build it myself, between init and analyze".
+        # Autobuild is the mode that does not work here.
+        build-mode: manual
     - id: build
       name: "Build, test and publish"
       shell: bash
@@ -142,6 +171,15 @@ runs:
         SKIP_TEST: ${{ inputs.skip_test }}
         TOKEN: ${{ inputs.token }}
         VERSION: ${{ steps.qualify-build.outputs.version }}
+    # Paired with codeql-init, on the same condition. `analyze` is what builds
+    # the database from what the compiler did and uploads the results.
+    - id: codeql-analyze
+      if: >-
+        inputs.codeql == 'true'
+        && steps.qualify-build.outputs.trigger != 'push_to_release_branch'
+      uses: github/codeql-action/analyze@v4
+      with:
+        category: "/language:java-kotlin"
     - id: clq-extract
       if: steps.qualify-build.outputs.trigger == 'push_to_release_branch'
       name: "Extract tag from the changelog"
