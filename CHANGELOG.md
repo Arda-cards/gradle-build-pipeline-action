@@ -22,20 +22,11 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
 
 ### Added
 
-- A `codeql` input that analyses Kotlin and Java with CodeQL around the build this
-  action already runs, rather than alongside it. CodeQL's extractor observes the
-  compiler, so it needs a build; wrapping the existing one means the analysis
-  inherits the Gradle cache, the JDK, `buf`, and the package credentials in one
-  pass instead of paying for a second build that lacks all four. CodeQL's own
-  autobuild has none of them — measured 2026-08-07, it failed on `accounts` for an
-  unresolvable `cards.arda.common:lib` and on `operations` for a missing `buf`.
-
-  The calling job must grant `security-events: write`; a composite action cannot
-  grant it for its caller. The input therefore defaults to `false`, so releasing
-  this version changes nothing for a consumer until that consumer opts in.
-
-  Skipped on the release build, where the same tree has already been analysed on
-  the pull request and in the merge queue.
+- A reusable `codeql` workflow, giving any Gradle repository CodeQL analysis of its
+  Kotlin and Java sources. GitHub's own default setup cannot build these projects —
+  it has neither the package credentials nor `buf` — so the workflow compiles with
+  the same toolchain the build uses. It runs as a job beside the caller's build
+  rather than inside it, so analysis does not lengthen the path to a merge.
 
 ## [1.4.0] - 2026-08-07
 
