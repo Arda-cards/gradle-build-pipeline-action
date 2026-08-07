@@ -18,6 +18,16 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
   - `Fixed` for any bugfixes.
   - `Security` in case of vulnerabilities.
 
+## [1.4.0] - 2026-08-07
+
+### Added
+
+- Two inputs passed straight through to `qualify-build-action`, both with the same defaults it uses, so
+  no consumer changes: `validate_against_base`, which a repository composing its changelog after merge
+  sets to `false` because its pull requests introduce no new version; and `changelog_dir`, naming the
+  directory whose file may carry a `feature-build:` marker. A repository reaches this action rather than
+  `qualify-build-action` directly, so without the passthrough neither input is usable.
+
 ## [1.3.9] - 2026-06-29
 
 ### Fixed
