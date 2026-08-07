@@ -22,6 +22,10 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
 
 ### Added
 
+- Pull-request upkeep follows `accounts` onto `pull-request-setup-action@v2`, dropping the
+  `project_title` and `iteration_field_name` inputs. The GitHub "Product Roadmap" project they
+  reference is obsolete — tracking moved to Linear — so the step failed looking for a project that no
+  longer exists.
 - Two inputs passed straight through to `qualify-build-action`, both with the same defaults it uses, so
   no consumer changes: `validate_against_base`, which a repository composing its changelog after merge
   sets to `false` because its pull requests introduce no new version; and `changelog_dir`, naming the
