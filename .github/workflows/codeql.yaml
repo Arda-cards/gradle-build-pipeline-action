@@ -19,6 +19,11 @@
 #    from clean code. `--no-build-cache` is what stops that, and it is why this
 #    build cannot share the test build's cache even though it shares the
 #    dependency cache.
+#
+# The calling job must grant `contents: read` and `security-events: write`. The
+# permissions declared below are a ceiling, not a grant: a called workflow can
+# only restrict what its caller already has, so a caller with `permissions: {}`
+# leaves this job unable to upload its results.
 name: codeql
 
 on:
