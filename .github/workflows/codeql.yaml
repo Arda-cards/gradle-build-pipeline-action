@@ -193,3 +193,45 @@ jobs:
       - uses: github/codeql-action/analyze@v4
         with:
           category: "/language:${{ matrix.language }}"
+
+  # One check name to require in a ruleset, whatever the matrix happens to
+  # contain.
+  #
+  # Without this there is nothing stable to require. Each job above publishes
+  # its own check as `<caller-job> / <job name>`, and the interpreted job's name
+  # carries the language — so the set of names differs per repository, and
+  # adding a language to `no_build_languages` renames the checks. A ruleset
+  # still demanding the old name then blocks every pull request on a check that
+  # will never be published again.
+  #
+  # `if: always()` is the load-bearing line. Without it this job is *skipped*
+  # when a dependency fails, and a skipped required check reports success — so
+  # the aggregate would go green precisely when the analysis failed.
+  codeql:
+    name: codeql
+    needs: [compiled, interpreted]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Report the combined result"
+        env:
+          COMPILED: ${{ needs.compiled.result }}
+          INTERPRETED: ${{ needs.interpreted.result }}
+        run: |
+          [ "${RUNNER_DEBUG}" == 1 ] && set -xv
+          set -uo pipefail
+
+          echo "::notice::compiled=${COMPILED} interpreted=${INTERPRETED}"
+
+          rs=0
+          [ "${COMPILED}" == "success" ] || rs=1
+
+          # Skipped is legitimate here, and only here: a repository with no
+          # source-extracted languages passes `no_build_languages: "[]"`.
+          case "${INTERPRETED}" in
+            success | skipped) ;;
+            *) rs=1 ;;
+          esac
+
+          [ "${rs}" -eq 0 ] || echo "::error::CodeQL analysis did not succeed"
+          exit "${rs}"

@@ -33,6 +33,10 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
   the compiled language. The workflow therefore also analyses the languages default
   setup was covering, named through `no_build_languages`.
 
+  A `codeql` job reports the combined result under one name, so a ruleset has
+  something stable to require: the per-language checks are named after the matrix
+  and change whenever the language list does.
+
 ## [1.4.0] - 2026-08-07
 
 ### Added
