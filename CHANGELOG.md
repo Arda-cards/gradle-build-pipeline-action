@@ -25,8 +25,13 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
 - A reusable `codeql` workflow, giving any Gradle repository CodeQL analysis of its
   Kotlin and Java sources. GitHub's own default setup cannot build these projects —
   it has neither the package credentials nor `buf` — so the workflow compiles with
-  the same toolchain the build uses. It runs as a job beside the caller's build
-  rather than inside it, so analysis does not lengthen the path to a merge.
+  the same toolchain the build uses. It runs beside the caller's build rather than
+  inside it, so analysis does not lengthen the path to a merge.
+
+  It replaces default setup rather than supplementing it, because switching to an
+  advanced configuration disables CodeQL for the whole repository and not just for
+  the compiled language. The workflow therefore also analyses the languages default
+  setup was covering, named through `no_build_languages`.
 
 ## [1.4.0] - 2026-08-07
 

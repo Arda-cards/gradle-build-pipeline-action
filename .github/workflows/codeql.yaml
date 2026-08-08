@@ -1,13 +1,26 @@
 ---
-# CodeQL analysis for a Gradle project, as a job a consumer runs alongside its
+# CodeQL analysis for a Gradle project, as jobs a consumer runs alongside its
 # build rather than inside it.
 #
-# Three constraints shape this, and together they rule out the simpler designs.
+# This replaces GitHub's default setup entirely. The documented way to adopt an
+# advanced configuration is to "Switch to advanced" and disable CodeQL default
+# setup, which is repository-wide rather than per-language — so a consumer that
+# adopts this must also disable default setup, and this workflow has to cover
+# every language that setup was covering, not only the compiled one.
 #
-# 1. CodeQL's extractor observes the compiler; it cannot read compiled classes
-#    after the fact. So it needs a build of its own, and `init`, that build, and
-#    `analyze` must all live in one job. A composite action cannot create a job,
-#    which is why this is a reusable workflow.
+# Hence two jobs. They differ in one thing that cannot be expressed in a single
+# CodeQL invocation: whether the language needs to be built.
+#
+#   compiled     java-kotlin, build-mode manual — CodeQL's extractor observes
+#                the compiler, so there has to be a compile for it to watch.
+#   interpreted  actions, javascript-typescript and the like, build-mode none —
+#                extracted straight from source, so no JDK, no Gradle, no buf.
+#
+# Three constraints shaped the compiled job, and together they rule out the
+# simpler designs.
+#
+# 1. `init`, the build, and `analyze` must live in one job. A composite action
+#    cannot create a job, which is why this is a reusable workflow.
 #
 # 2. Wrapping the consumer's existing `./gradlew build` would make analysis wait
 #    for the tests. Compiling separately costs one extra compile and hides the
@@ -23,7 +36,7 @@
 # The calling job must grant `contents: read` and `security-events: write`. The
 # permissions declared below are a ceiling, not a grant: a called workflow can
 # only restrict what its caller already has, so a caller with `permissions: {}`
-# leaves this job unable to upload its results.
+# leaves these jobs unable to upload their results.
 name: codeql
 
 on:
@@ -44,6 +57,15 @@ on:
         type: string
         required: false
         default: "assemble"
+      no_build_languages:
+        description: >-
+          JSON array of languages extracted from source without a build. These
+          are the ones default setup was covering for free, and they have to be
+          named here because adopting this workflow turns default setup off.
+          Pass "[]" for a repository that has none.
+        type: string
+        required: false
+        default: '["actions"]'
     secrets:
       gpr_user:
         description: "User with read access to GitHub Packages, for dependency resolution."
@@ -58,7 +80,8 @@ on:
 permissions: {}
 
 jobs:
-  codeql:
+  compiled:
+    name: "codeql (java-kotlin)"
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -144,3 +167,29 @@ jobs:
       - uses: github/codeql-action/analyze@v4
         with:
           category: "/language:java-kotlin"
+
+  # Everything default setup used to cover for free. Cheap — no build tooling,
+  # no compile — but it has to be here, because adopting advanced setup turns
+  # default setup off for the whole repository rather than for one language.
+  interpreted:
+    name: "codeql (${{ matrix.language }})"
+    if: inputs.no_build_languages != '[]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ${{ fromJSON(inputs.no_build_languages) }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+
+      - uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{ matrix.language }}"
