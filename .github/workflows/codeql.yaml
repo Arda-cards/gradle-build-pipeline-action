@@ -119,9 +119,11 @@ jobs:
           BUF_TOKEN: ${{ secrets.buf_token }}
           GPR_USER: ${{ secrets.gpr_user }}
           GPR_KEY: ${{ secrets.gpr_key }}
-          # gradle-build.sh exports these from GITHUB_ACTOR and TOKEN; the
-          # publishing repositories read the same pair under different names.
-          USERNAME: ${{ github.actor }}
+          # The same credentials again, under the names the publishing
+          # repositories read them by. Both halves come from gpr_*: pairing the
+          # triggering actor with gpr_user's token is two identities, which a
+          # fine-grained token rejects.
+          USERNAME: ${{ secrets.gpr_user }}
           TOKEN: ${{ secrets.gpr_key }}
           GRADLE_TASK: ${{ inputs.gradle_task }}
         run: |
