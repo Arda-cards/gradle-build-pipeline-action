@@ -18,6 +18,23 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
   - `Fixed` for any bugfixes.
   - `Security` in case of vulnerabilities.
 
+## [1.5.0] - 2026-08-18
+
+### Added
+
+- `feature_marker` passes through to `qualify-build-action`, so a repository that knows
+  where its own markers live can say so rather than have the shared action guess. What it
+  replaces could not see a marker in a pull-request body, and failed a build whenever two
+  entry files were present even if neither was marked.
+- `kind` is emitted as an output, reporting whether the build published or was a test.
+  Callers were deciding whether to deploy by checking that `chart_name` came back
+  non-empty, which is true of any publish — feature builds included — and so could not
+  tell the two apart.
+
+### Deprecated
+
+- `changelog_dir`, now consulted only when `feature_marker` is unset.
+
 ## [1.5.0] - 2026-08-24
 
 ### Added
