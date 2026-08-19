@@ -22,6 +22,10 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
 
 ### Added
 
+- `derive_feature_marker`, passed to qualify-build-action. Set it `false` when supplying
+  `feature_marker`: an empty marker otherwise reads as "the caller said nothing" and falls
+  through to a derivation that rejects a changelog directory holding more than one entry
+  file — which is what a merge queue stages on every batch.
 - `feature_marker` passes through to `qualify-build-action`, so a repository that knows
   where its own markers live can say so rather than have the shared action guess. What it
   replaces could not see a marker in a pull-request body, and failed a build whenever two

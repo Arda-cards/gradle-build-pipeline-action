@@ -11,9 +11,18 @@ inputs:
       entry files are present even if neither is marked.
     required: false
     default: ""
+  derive_feature_marker:
+    description: >-
+      DEPRECATED. Whether qualify-build-action may fall back to deriving the marker from
+      `changelog_dir`. Set `false` whenever you supply `feature_marker`, because "no
+      marker" is an answer: left `true`, an unmarked branch falls through to the
+      derivation anyway, and the derivation rejects a changelog directory holding more
+      than one entry file — which is what a merge queue stages on every batch.
+    required: false
+    default: "true"
   changelog_dir:
     description: >-
-      DEPRECATED, and only consulted when `feature_marker` is unset; passed to
+      DEPRECATED, and only consulted when the derivation runs; passed to
       qualify-build-action. Directory holding per-pull-request changelog files.
     required: false
     default: .changelog
@@ -95,10 +104,11 @@ runs:
     # This SHA is the head of that pull request, so the chain can be exercised
     # end to end on real pull requests in `operations` before either action
     # merges to main. It becomes @v2.2.0 in a follow-up before this is released.
-    - uses: Arda-cards/qualify-build-action@d5a7b184d55064edc1e68c08e05e79595dfb90d9
+    - uses: Arda-cards/qualify-build-action@eab7dfae436c0a15a176eaf3c7c6b2947a07d3da
       id: qualify-build
       with:
         feature_marker: ${{ inputs.feature_marker }}
+        derive_feature_marker: ${{ inputs.derive_feature_marker }}
         changelog_dir: ${{ inputs.changelog_dir }}
         validate_against_base: ${{ inputs.validate_against_base }}
         workflow_name: "context:build"
