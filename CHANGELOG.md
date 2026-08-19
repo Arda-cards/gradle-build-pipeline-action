@@ -23,6 +23,7 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
 ### Fixed
 
 - Extract the Gradle toolchain setup into a separate action.
+- Invoke publish in 2nd call to gradle to prevent failing test to leave artifacts published that aren't valid.
 
 ## [1.4.0] - 2026-08-07
 
