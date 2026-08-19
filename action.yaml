@@ -88,7 +88,14 @@ runs:
         name="$(./gradlew -q properties | grep ^name: | cut -d: -f 2 | tr -d ' ')"
         echo "::notice::name is ${name}"
         echo "name=${name}" >>"${GITHUB_OUTPUT}"
-    - uses: Arda-cards/qualify-build-action@v2
+    # TEMPORARY PIN — qualify-build-action#9, unreleased.
+    #
+    # `feature_marker` does not exist on @v2, so pinning the released tag would
+    # accept the input here and drop it there: a green build proving nothing.
+    # This SHA is the head of that pull request, so the chain can be exercised
+    # end to end on real pull requests in `operations` before either action
+    # merges to main. It becomes @v2.2.0 in a follow-up before this is released.
+    - uses: Arda-cards/qualify-build-action@d5a7b184d55064edc1e68c08e05e79595dfb90d9
       id: qualify-build
       with:
         feature_marker: ${{ inputs.feature_marker }}
