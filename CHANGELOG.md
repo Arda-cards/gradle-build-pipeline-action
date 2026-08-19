@@ -18,6 +18,12 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
   - `Fixed` for any bugfixes.
   - `Security` in case of vulnerabilities.
 
+## [1.4.1] - 2026-08-19
+
+### Fixed
+
+- Extract and logic the gradle toolchain setup into a separate action.
+
 ## [1.4.0] - 2026-08-07
 
 ### Added
