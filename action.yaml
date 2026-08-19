@@ -56,7 +56,8 @@ runs:
       uses: Arda-cards/gradle-toolchain-action@v1
       with:
         token: ${{ inputs.token }}
-    - name: "Read module information"
+    - id: read-module-info
+      name: "Read module information"
       shell: bash
       run: |
         [ "${{ runner.debug }}" == 1 ] && set -xv
