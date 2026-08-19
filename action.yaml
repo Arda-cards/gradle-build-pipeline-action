@@ -52,46 +52,10 @@ runs:
         
         git config user.name "${{ github.actor }}"
         git config user.email "${{ github.actor }}@users.noreply.github.com"
-    - id: read-tools-choice
-      name: "Read tools version"
-      shell: bash
-      run: |
-        [ "${{ runner.debug }}" == 1 ] && set -xv
-        set -u
-
-        property_name=helm.client.download.version
-        if grep -qs -w ^${property_name} gradle.properties; then
-          helm_version="$(grep -w ^${property_name} gradle.properties | cut -d= -f2)"
-        fi
-
-        property_name=toolchainVersion
-        if grep -qs -w ^${property_name} gradle/gradle-daemon-jvm.properties; then
-          java_version="$(grep -w ^${property_name} gradle/gradle-daemon-jvm.properties | cut -d= -f2)"
-        else
-          java_version=21
-        fi
-
-        property_name=toolchainVendor
-        if grep -qs -w ^${property_name} gradle/gradle-daemon-jvm.properties; then
-          java_vendor="$(grep -w ^${property_name} gradle/gradle-daemon-jvm.properties | cut -d= -f2)"
-        else
-          java_vendor=corretto
-        fi
-
-        {
-        [ -v helm_version ] && echo "helm_version=${helm_version}"
-        echo "java_version=${java_version}"
-        echo "java_vendor=${java_vendor}"
-        } >>"${GITHUB_OUTPUT}"
-    - uses: actions/setup-java@v5
+    - name: "Setup gradle toolchain"
+      uses: Arda-cards/gradle-toolchain-action@v1
       with:
-        distribution: ${{ steps.read-tools-choice.outputs.java_vendor }}
-        java-version: ${{ steps.read-tools-choice.outputs.java_version }}
-    - uses: gradle/actions/setup-gradle@v6
-    - uses: azure/setup-helm@v5
-      if: ${{ steps.read-tools-choice.outputs.helm_version }}
-      with:
-        version: ${{ steps.read-tools-choice.outputs.helm_version }}
+        token: ${{ inputs.token }}
     - id: read-module-info
       name: "Read module information"
       shell: bash
@@ -113,7 +77,7 @@ runs:
       run: |
         [ "${{ runner.debug }}" == 1 ] && set -xv
         set -u
-  
+        
         readonly tag="${{ steps.qualify-build.outputs.tag }}"
         if [ "${{ steps.qualify-build.outputs.trigger }}" == "push_to_release_branch" ]; then
           if [ "${{ steps.qualify-build.outputs.kind }}" == "publish" ]; then
@@ -136,7 +100,7 @@ runs:
       env:
         DOCKER_REGISTRY: ${{ inputs.docker_registry }}
         GPR_USER: ${{ inputs.gpr_user }}
-        GPR_KEY:  ${{ inputs.gpr_key }}
+        GPR_KEY: ${{ inputs.gpr_key }}
         HELM_REGISTRY: ${{ inputs.helm_registry }}
         KIND: ${{ steps.qualify-build.outputs.kind }}
         SKIP_TEST: ${{ inputs.skip_test }}
@@ -162,7 +126,7 @@ runs:
       run: |
         [ "${{ runner.debug }}" == 1 ] && set -xv
         set -u
-  
+        
         if [ "${{ steps.qualify-build.outputs.kind }}" == "publish" ] \
             && [ "${{ steps.qualify-build.outputs.trigger }}" == "push_to_release_branch" ] ; then
           readonly tag="${{ steps.qualify-build.outputs.tag }}"

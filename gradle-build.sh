@@ -28,7 +28,6 @@ fi
 case "${KIND}" in
 test) ;;
 publish)
-  gradle_arguments+=("publish")
   if [ -z "${VERSION}" ]; then
     echo "::error::Version required to publish"
     exit 1
@@ -45,6 +44,10 @@ echo "::group::Build"
 echo "::endgroup::"
 
 if [ "${KIND}" = "publish" ]; then
+
+  echo "::group::Publish"
+  ./gradlew publish "${gradle_arguments[@]}"
+  echo "::endgroup::"
 
   # Assuming a single chart in the module...
   readonly chartDir=build/helm/charts
