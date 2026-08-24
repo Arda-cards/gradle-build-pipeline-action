@@ -22,7 +22,7 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
 
 ### Added
 
-- Optionally upload kover result to CodeCov
+- Optionally upload kover result to Codecov
 
 ## [1.4.1] - 2026-08-19
 
