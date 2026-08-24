@@ -6,6 +6,10 @@ inputs:
     description: "Directory holding per-pull-request changelog files; passed to qualify-build-action."
     required: false
     default: .changelog
+  codecov_token:
+    description: "The token to upload coverage to Codecov"
+    required: false
+    default: ""
   docker_registry:
     description: "The registry to persist Docker images"
     required: true
@@ -143,3 +147,11 @@ runs:
         path: |
           **/build/reports/
           **/build/test-results/
+    - name: "Upload coverage to Codecov"
+      if: always() && inputs.codecov_token != '' && hashFiles('build/reports/kover/report.xml') != ''
+      continue-on-error: true
+      uses: codecov/codecov-action@v7
+      with:
+        token: ${{ inputs.codecov_token }}
+        files: build/reports/kover/report.xml
+        fail_ci_if_error: false

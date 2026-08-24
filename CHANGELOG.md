@@ -18,6 +18,12 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
   - `Fixed` for any bugfixes.
   - `Security` in case of vulnerabilities.
 
+## [1.5.0] - 2026-08-24
+
+### Added
+
+- Optionally upload kover result to CodeCov
+
 ## [1.4.1] - 2026-08-19
 
 ### Fixed
