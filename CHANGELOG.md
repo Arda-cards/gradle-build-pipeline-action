@@ -29,7 +29,7 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
 - `kind` is emitted as an output, reporting whether the build published or was a test.
   Callers were gating deployment on `chart_name` being non-empty, which reads an artifact
   name as though it were a decision. A feature build also reports `publish`, so the event
-  and ref still tell a release from one.
+  and ref still distinguish a release from a feature build.
 
 ## [1.5.0] - 2026-08-24
 
