@@ -2,6 +2,18 @@
 name: gradle-build-pipeline
 description: "Checkout, build and tag gradle projects"
 inputs:
+  feature_marker:
+    description: >-
+      The feature-build marker for this ref, used when `derive_feature_marker` is
+      `false`; empty is valid and means an ordinary build. Passed to qualify-build-action.
+    required: false
+    default: ""
+  derive_feature_marker:
+    description: >-
+      Whether qualify-build-action reads the marker from `changelog_dir` instead of
+      taking it from `feature_marker`. Must be `false` when `feature_marker` is non-empty.
+    required: false
+    default: "true"
   changelog_dir:
     description: "Directory holding per-pull-request changelog files; passed to qualify-build-action."
     required: false
@@ -45,6 +57,13 @@ outputs:
   module_name:
     description: "The name of the module"
     value: ${{ steps.read-module-info.outputs.name }}
+  kind:
+    description: >-
+      Whether this build published artifacts (`publish`) or was a test (`test`). Lets a
+      caller gate on the build's own classification rather than infer it from whether an
+      artifact name came back. Note that a feature build also reports `publish`; use the
+      event and ref to tell a release from a feature build.
+    value: ${{ steps.qualify-build.outputs.kind }}
 runs:
   using: "composite"
   steps:
@@ -73,6 +92,8 @@ runs:
     - uses: Arda-cards/qualify-build-action@v2
       id: qualify-build
       with:
+        feature_marker: ${{ inputs.feature_marker }}
+        derive_feature_marker: ${{ inputs.derive_feature_marker }}
         changelog_dir: ${{ inputs.changelog_dir }}
         validate_against_base: ${{ inputs.validate_against_base }}
         workflow_name: "context:build"
