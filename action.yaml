@@ -59,10 +59,10 @@ outputs:
     value: ${{ steps.read-module-info.outputs.name }}
   kind:
     description: >-
-      What this build was: `publish` or `test`. Surfaced so a caller can decide whether
-      to deploy by asking what kind of build ran, rather than by inferring it from
-      whether `chart_name` came back non-empty — which is true of any publish, feature
-      builds included, and so cannot distinguish them.
+      Whether this build published artifacts (`publish`) or was a test (`test`). Lets a
+      caller gate on the build's own classification rather than infer it from whether an
+      artifact name came back. Note that a feature build also reports `publish`; use the
+      event and ref to tell a release from a feature build.
     value: ${{ steps.qualify-build.outputs.kind }}
 runs:
   using: "composite"

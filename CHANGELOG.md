@@ -27,9 +27,9 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
   the ref instead of having one derived from a directory that then holds more than one
   entry. Repositories that set neither are unaffected.
 - `kind` is emitted as an output, reporting whether the build published or was a test.
-  Callers were deciding whether to deploy by checking that `chart_name` came back
-  non-empty, which is true of any publish — feature builds included — and so could not
-  tell the two apart.
+  Callers were gating deployment on `chart_name` being non-empty, which reads an artifact
+  name as though it were a decision. A feature build also reports `publish`, so the event
+  and ref still tell a release from one.
 
 ## [1.5.0] - 2026-08-24
 
