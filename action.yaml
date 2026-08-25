@@ -4,26 +4,18 @@ description: "Checkout, build and tag gradle projects"
 inputs:
   feature_marker:
     description: >-
-      The feature-build marker for this ref, or empty for an ordinary build; passed to
-      qualify-build-action, which takes it as given rather than deriving one. Supply this
-      if your repository has a convention for where markers live — the derivation it
-      replaces cannot see a marker in a pull-request body, and fails a build when two
-      entry files are present even if neither is marked.
+      The feature-build marker for this ref, used when `derive_feature_marker` is
+      `false`; empty is valid and means an ordinary build. Passed to qualify-build-action.
     required: false
     default: ""
   derive_feature_marker:
     description: >-
-      DEPRECATED. Whether qualify-build-action may fall back to deriving the marker from
-      `changelog_dir`. Set `false` whenever you supply `feature_marker`, because "no
-      marker" is an answer: left `true`, an unmarked branch falls through to the
-      derivation anyway, and the derivation rejects a changelog directory holding more
-      than one entry file — which is what a merge queue stages on every batch.
+      Whether qualify-build-action reads the marker from `changelog_dir` instead of
+      taking it from `feature_marker`. Must be `false` when `feature_marker` is non-empty.
     required: false
     default: "true"
   changelog_dir:
-    description: >-
-      DEPRECATED, and only consulted when the derivation runs; passed to
-      qualify-build-action. Directory holding per-pull-request changelog files.
+    description: "Directory holding per-pull-request changelog files; passed to qualify-build-action."
     required: false
     default: .changelog
   codecov_token:

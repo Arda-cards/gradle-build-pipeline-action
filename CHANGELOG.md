@@ -18,26 +18,18 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
   - `Fixed` for any bugfixes.
   - `Security` in case of vulnerabilities.
 
-## [1.5.0] - 2026-08-18
+## [1.5.0] - 2026-08-24
 
 ### Added
 
-- `derive_feature_marker`, passed to qualify-build-action. Set it `false` when supplying
-  `feature_marker`: an empty marker otherwise reads as "the caller said nothing" and falls
-  through to a derivation that rejects a changelog directory holding more than one entry
-  file — which is what a merge queue stages on every batch.
-- `feature_marker` passes through to `qualify-build-action`, so a repository that knows
-  where its own markers live can say so rather than have the shared action guess. What it
-  replaces could not see a marker in a pull-request body, and failed a build whenever two
-  entry files were present even if neither was marked.
+- `feature_marker` and `derive_feature_marker` pass through to qualify-build-action, so a
+  repository whose merge queue batches several changelog entries can state the marker for
+  the ref instead of having one derived from a directory that then holds more than one
+  entry. Repositories that set neither are unaffected.
 - `kind` is emitted as an output, reporting whether the build published or was a test.
   Callers were deciding whether to deploy by checking that `chart_name` came back
   non-empty, which is true of any publish — feature builds included — and so could not
   tell the two apart.
-
-### Deprecated
-
-- `changelog_dir`, now consulted only when `feature_marker` is unset.
 
 ## [1.5.0] - 2026-08-24
 
