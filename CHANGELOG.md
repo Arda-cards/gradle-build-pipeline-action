@@ -18,6 +18,13 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
   - `Fixed` for any bugfixes.
   - `Security` in case of vulnerabilities.
 
+## [1.6.1] - 2026-09-13
+
+### Fixed
+
+- In a multi-project build where the main chart includes subcharts from published repositories,
+  the check for the existence of a chart to publish was too broad.
+
 ## [1.6.0] - 2026-08-25
 
 ### Added

@@ -53,8 +53,12 @@ if [ "${KIND}" = "publish" ]; then
   readonly chartDir=build/helm/charts
   # Creating the dir to prevent error when there no charts
   mkdir -p ${chartDir}
-  chartTgz=$(find ${chartDir} -name '*.tgz')
-  if [ -f "${chartTgz}" ]; then
+  if chartTgz=$(ls ${chartDir}/*.tgz 2>/dev/null); then
+    if [[ "${chartTgz}" == *$'\n'* ]]; then
+      echo "::error::More than one Helm chart found in ${chartDir}"
+      exit 1
+    fi
+
     echo "::group::Publish Helm"
     echo "Pushing chart ${chartTgz} to ${HELM_REGISTRY}"
 
