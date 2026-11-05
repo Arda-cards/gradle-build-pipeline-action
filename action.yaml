@@ -174,5 +174,16 @@ runs:
       uses: codecov/codecov-action@v7
       with:
         token: ${{ inputs.codecov_token }}
+        report_type: coverage
         files: build/reports/kover/report.xml
         fail_ci_if_error: false
+        handle_no_reports_found: true
+    - name: Upload test results to Codecov
+      if: always() && inputs.codecov_token != ''
+      continue-on-error: true
+      uses: codecov/codecov-action@v7
+      with:
+        token: ${{ inputs.codecov_token }}
+        report_type: test_results
+        fail_ci_if_error: false
+        handle_no_reports_found: true
