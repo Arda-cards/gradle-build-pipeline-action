@@ -18,7 +18,11 @@ Categories, defined in [changemap.json](.github/clq/changemap.json):
   - `Fixed` for any bugfixes.
   - `Security` in case of vulnerabilities.
 
-## [1.6.2] - 2026-11-05
+## [1.7.0] - 2026-11-05
+
+### Added
+
+- Upload JUnit test reports to Codecov
 
 ### Fixed
 
